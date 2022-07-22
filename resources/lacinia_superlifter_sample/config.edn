@@ -1,0 +1,25 @@
+{:duct.profile/base
+ {:duct.core/project-ns  lacinia-superlifter-sample
+
+  :duct.server/pedestal
+  {:base-service #ig/ref :lacinia-superlifter-sample.graphql/service
+   :service #:io.pedestal.http{:type :jetty
+                               :join? true
+                               :host #duct/env "SERVER_HOST"
+                               :port #duct/env ["SERVER_PORT" Int :or 8888]}}
+
+  :lacinia-superlifter-sample.graphql/schema
+  {:path "lacinia_superlifter_sample/schema.graphql"}
+
+  :lacinia-superlifter-sample.graphql/service
+  {:schema #ig/ref :lacinia-superlifter-sample.graphql/schema
+   :options {:api-path "/graphql"
+             :ide-path "/"
+             :asset-path "/assets/graphiql"
+             :app-context {}
+             :env :prod}}}
+
+ :duct.profile/dev #duct/include "dev"
+ :duct.profile/prod {}
+
+ :duct.module/pedestal {}}

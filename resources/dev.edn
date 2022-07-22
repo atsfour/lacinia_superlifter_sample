@@ -1,0 +1,5 @@
+{:duct.server/pedestal
+ {:service #:io.pedestal.http{:join? false}}
+
+ :lacinia-superlifter-sample.graphql.graphql/service
+ {:options {:env :dev}}}
