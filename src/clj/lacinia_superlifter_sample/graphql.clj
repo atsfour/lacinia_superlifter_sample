@@ -7,7 +7,8 @@
     [com.walmartlabs.lacinia.util :as util]
     [integrant.core :as ig]
     [io.pedestal.http :as http]
-    [lacinia-superlifter-sample.resolver :as resolver]))
+    [lacinia-superlifter-sample.resolver :as resolver]
+    [superlifter.lacinia]))
 
 
 (defmethod ig/init-key ::schema
@@ -15,7 +16,7 @@
   (-> (io/resource path)
       slurp
       (parser.schema/parse-schema)
-      (util/inject-resolvers resolver/joined-resolver-map)))
+      (util/inject-resolvers resolver/superlifter-resolver-map)))
 
 
 (defn routes
@@ -28,10 +29,19 @@
         (lacinia.pedestal2/graphiql-asset-routes asset-path)))
 
 
+(def superlifter-args
+  {:buckets {:default {:triggers {:queue-size {:threshold 5}
+                                  :debounced {:interval 100}}}
+             :friends {:triggers {:queue-size {:threshold 5}
+                                  :debounced {:interval 100}}}}
+   :urania-opts {:env {}}})
+
+
 (defmethod ig/init-key ::service
   [_ {:keys [schema options]}]
   (let [compiled-schema (schema/compile schema)
-        interceptors (lacinia.pedestal2/default-interceptors compiled-schema (:app-context options))]
+        interceptors (into [(superlifter.lacinia/inject-superlifter superlifter-args)]
+                           (lacinia.pedestal2/default-interceptors compiled-schema (:app-context options)))]
     (lacinia.pedestal2/enable-graphiql
       {:env (:env options)
        ::http/routes (routes interceptors options)

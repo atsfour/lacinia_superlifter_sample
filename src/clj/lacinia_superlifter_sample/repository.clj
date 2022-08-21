@@ -61,3 +61,9 @@
   []
   (db-access-log "list-persons-with-friends" [])
   (map #(assoc % :friends (get friendship-map (:id %))) persons))
+
+
+(defn list-friends-by-ids
+  [ids]
+  (db-access-log "fetch-friends-by-ids" [ids])
+  (zipmap ids (map #(get friendship-map %) ids)))
